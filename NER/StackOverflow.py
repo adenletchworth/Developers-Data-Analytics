@@ -1,14 +1,12 @@
-
 import re
 import spacy
 from spacy.matcher import PhraseMatcher
 from spacy.tokens import Span
-import NER.BigQuery as bq
+import BigQuery as bq
 from typing import Generator, Optional, Union, Dict, List
 import json
 
 nlp = spacy.load("en_core_web_sm")
-matcher = PhraseMatcher(nlp.vocab, attr="LOWER")  
 
 def normalize_and_annotate_with_phrase_matcher_batched(batches: Generator[List[Union[tuple, Dict[str, any]]], None, None]):
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
@@ -43,13 +41,46 @@ def save_annotated_data_as_json(annotated_data, file_path):
         json.dump(annotated_data, f, ensure_ascii=False, indent=4)
 
 
+def create_data_for_word2vec(batches):
+    annotated_batch = []
+    for batch in batches:
+        for body in batch:
+            annotated_batch.append(body)
+    return annotated_batch
+    
+        
+def create_json_for_spacy():
+    query = """
+    SELECT title, body FROM `stack_overflow.posts_tag_wiki_excerpt`
+    WHERE title IS NOT NULL AND body IS NOT NULL
+    """
 
-query = """
-SELECT title, body FROM `stack_overflow.posts_tag_wiki_excerpt`
-WHERE title IS NOT NULL AND body IS NOT NULL
-"""
+    batch_size = 10000  
+    batches = bq.query_bigquery_batched(query, batch_size=batch_size)
 
-batches = bq.query_bigquery_batched(query, batch_size=500)
-for i, annotated_batch in enumerate(normalize_and_annotate_with_phrase_matcher_batched(batches)):
-    file_path = f"./NER_DATA/{i}.json"
-    save_annotated_data_as_json(annotated_batch, file_path)
+    all_annotated_data = []
+
+    for annotated_batch in normalize_and_annotate_with_phrase_matcher_batched(batches):
+        all_annotated_data.extend(annotated_batch) 
+
+    file_path = "./NER/CS_ENTITIES.json"
+    save_annotated_data_as_json(all_annotated_data, file_path)
+
+
+def create_txt_for_word2vec(file_path):
+    query = """
+    SELECT title,body FROM `stack_overflow.posts_tag_wiki_excerpt`
+    WHERE body IS NOT NULL
+    """
+    
+    batch_size = 10000  
+    batches = bq.query_bigquery_batched(query, batch_size=batch_size)
+
+    all_annotated_data = create_data_for_word2vec(batches)
+    
+    with open(file_path, 'w', encoding='utf-8') as file:
+        for _, sentence in all_annotated_data:
+            file.write(sentence + '\n')  
+
+
+# create_txt_for_word2vec('./NER/NER_DATA/word2vec.txt')
