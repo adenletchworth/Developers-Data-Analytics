@@ -21,7 +21,7 @@ class GithubExtractor:
         if response.status_code == 200:
             repo_data = response.json()
             languages = self.get_repo_languages(repo)
-            
+        
             return {
             'forks_count': repo_data['forks_count'],
             'stargazers_count': repo_data['stargazers_count'],
