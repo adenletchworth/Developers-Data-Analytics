@@ -1,5 +1,6 @@
 Credentials
 __pycache__
 data_env
-/NER/models/
-
+dags/NER/models
+dags/NER/data
+logs
