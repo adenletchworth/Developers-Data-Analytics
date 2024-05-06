@@ -1,6 +1,10 @@
 from pymongo import MongoClient
 
 def load_data_into_mongodb(data):
+    if data is None:
+        print("No data to load into MongoDB")
+        return
+    
     connection_string = "mongodb://host.docker.internal:27017/"
     client = MongoClient(connection_string)
     
@@ -18,6 +22,8 @@ def load_data_into_mongodb(data):
 
     print("Data loaded successfully.")
     client.close()
+
+
 
     
 

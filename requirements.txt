@@ -2,3 +2,6 @@ spacy==3.7.4
 nltk==3.8.1
 pymongo==4.6.3
 requests==2.31.0
+torch==2.3.0
+transformers==4.40.1
+python-dotenv==1.0.1

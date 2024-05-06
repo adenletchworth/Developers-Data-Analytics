@@ -5,6 +5,7 @@ from airflow.operators.python import PythonOperator
 from ETL.extract_gh import GithubExtractor
 from ETL.transform_gh import transform
 from ETL.load_gh import load_data_into_mongodb
+from ETL.ner_module import NamedEntityRecognizer
 
 default_args = {
     'owner': 'airflow',
@@ -25,11 +26,10 @@ def extract_task(**kwargs):
     return repos_info  
 
 def transform_task(ti, **kwargs):
-    import spacy  # Import SpaCy inside the function
-    nlp = spacy.load('/opt/airflow/dags/NER/models/spacy_word2vec_model', disable=['parser', 'tagger']) 
+    entity_model = NamedEntityRecognizer('/opt/airflow/dags/NER/models/Transformers')
     
     data = ti.xcom_pull(task_ids='extract')
-    transformed_data = transform(data, nlp)
+    transformed_data = transform(data, entity_model)
     return transformed_data
 
 def load_task(ti, **kwargs):

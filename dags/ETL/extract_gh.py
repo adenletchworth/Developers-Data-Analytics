@@ -67,4 +67,6 @@ class GithubExtractor:
                 repos_info.append(repo_info)
         
         return repos_info
-            
+           
+extractor = GithubExtractor()
+print(extractor.get())
