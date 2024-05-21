@@ -1,17 +1,21 @@
-from datetime import datetime  
-from datetime import timedelta
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from ETL.extract_gh import GithubExtractor
 from ETL.transform_gh import transform
 from ETL.load_gh import load_data_into_mongodb
 from ETL.ner_module import NamedEntityRecognizer
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2024, 4, 8),  
+    'start_date': datetime.now() - timedelta(days=1),
     'retries': 1,
 }
+
 
 dag = DAG(
     'kafka_stream',
@@ -48,7 +52,6 @@ def load_task(ti, **kwargs):
 extract_operator = PythonOperator(
     task_id='extract',
     python_callable=extract_task,
-    provide_context=True,
     execution_timeout=timedelta(hours=2),
     dag=dag,
 )
@@ -56,14 +59,12 @@ extract_operator = PythonOperator(
 transform_operator = PythonOperator(
     task_id='transform',
     python_callable=transform_task,
-    provide_context=True,
     dag=dag,
 )
 
 load_operator = PythonOperator(
     task_id='load',
     python_callable=load_task,
-    provide_context=True,
     dag=dag,
 )
 

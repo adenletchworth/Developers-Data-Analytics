@@ -4,3 +4,4 @@ data_env
 dags/NER/models
 dags/NER/data
 logs
+.env

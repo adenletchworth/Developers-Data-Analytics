@@ -52,7 +52,7 @@ data = [
     {'id': 569191309, 'name': 'yarb', 'owner': {'login': 'NATIVE99', 'id': 35191800}, 'forks_count': 0, 'stargazers_count': 0, 'watchers_count': 0, 'description': 'Yet Another React Boilerplate', 'languages': ['JavaScript', 'HTML', 'CSS'], 'topics': ['react', 'boilerplate', 'react-boilerplate'], 'license': 'MIT License', 'created_at': '2016-04-25T14:52:00Z', 'updated_at': '2024-05-05T02:39:11Z', 'has_issues': True, 'has_projects': True, 'has_wiki': True, 'has_pages': True, 'has_downloads': True, 'open_issues_count': 0, 'forks': 0, 'size': 0},
 ]
 
-from ner_module import NamedEntityRecognizer
-transformed_data = transform(data, NamedEntityRecognizer('../NER/models/Transformers'))
+# from ner_module import NamedEntityRecognizer
+# transformed_data = transform(data, NamedEntityRecognizer('adenletchworth/CS-NER'))
 
-print(transformed_data)
+# print(transformed_data)
