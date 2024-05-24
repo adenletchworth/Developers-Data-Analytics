@@ -77,4 +77,4 @@ class GithubExtractor:
         return repos_info
 
 
-GithubExtractor()
+# GithubExtractor()
