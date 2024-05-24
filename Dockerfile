@@ -1,4 +1,8 @@
-FROM apache/airflow:2.8.4 
+FROM apache/airflow:2.8.4
+
+# Copy requirements file
 COPY requirements.txt /requirements.txt
-RUN pip install --user --upgrade pip
-RUN pip install --no-cache-dir --user -r /requirements.txt
+
+# Install dependencies
+RUN pip install --user --upgrade pip && \
+    pip install --user -r /requirements.txt
