@@ -9,8 +9,12 @@ def load_data_into_mongodb(data):
         collection = db['repos']
         
         if data:
-            collection.insert_many(data)
-            logging.info(f"Inserted {len(data)} records into MongoDB collection 'repos'.")
+            for record in data:
+                # Check for duplicates and upsert
+                filter_query = {'_id': record['_id']}
+                update_query = {'$set': record}
+                collection.update_one(filter_query, update_query, upsert=True)
+            logging.info(f"Inserted/Updated {len(data)} records into MongoDB collection 'repos'.")
         else:
             logging.warning("No data to insert into MongoDB.")
         

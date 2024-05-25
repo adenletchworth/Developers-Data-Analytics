@@ -1,5 +1,3 @@
-# /opt/airflow/dags/ETL/extract_reddit.py
-
 import praw
 import os
 import re
@@ -10,8 +8,10 @@ from nltk.stem import WordNetLemmatizer
 from keybert import KeyBERT
 from pymongo import MongoClient, errors
 from dotenv import load_dotenv
-from .ner_module import NamedEntityRecognizer 
+from .ner_module import NamedEntityRecognizer
 import logging
+import gzip
+import base64
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -34,7 +34,7 @@ class RedditExtractor:
 
         # Check MongoDB connection
         try:
-            self.mongo_client.server_info()  
+            self.mongo_client.server_info()
             logging.info("MongoDB server is accessible")
         except errors.ServerSelectionTimeoutError as err:
             logging.error(f"Error: {err}")
@@ -53,6 +53,14 @@ class RedditExtractor:
         lemmatizer = WordNetLemmatizer()
         tokens = [lemmatizer.lemmatize(word) for word in tokens]
         return ' '.join(tokens)
+
+    def compress_text(self, text):
+        compressed_data = gzip.compress(text.encode('utf-8'))
+        return base64.b64encode(compressed_data).decode('utf-8')
+
+    def decompress_text(self, compressed_text):
+        decoded_data = base64.b64decode(compressed_text.encode('utf-8'))
+        return gzip.decompress(decoded_data).decode('utf-8')
 
     def extract_entities(self, text):
         try:
@@ -76,25 +84,27 @@ class RedditExtractor:
         posts_data = []
         for post in hot_posts:
             preprocessed_body = self.preprocess_text(post.selftext)
-            logging.info(f"Preprocessed body: {preprocessed_body}")  # Debugging print
-            if preprocessed_body:  # Ensure the body is not empty
+            compressed_body = self.compress_text(preprocessed_body)
+            logging.info(f"Compressed body: {compressed_body}")  # Debugging print
+            if compressed_body:  # Ensure the body is not empty
                 entities = self.extract_entities(preprocessed_body)
                 logging.info(f"Entities: {entities}")  # Debugging print
                 keywords = self.extract_keywords(preprocessed_body)
                 post_data = {
                     'title': post.title,
                     'created': post.created,
-                    'body': preprocessed_body,
+                    'body': compressed_body,
                     'entities': entities,
                     'keywords': keywords,
                     'subreddit': str(post.subreddit)
                 }
-                posts_data.append(post_data)
                 try:
-                    self.collection.insert_one(post_data)
+                    result = self.collection.insert_one(post_data)
+                    post_data['_id'] = str(result.inserted_id)  # Convert ObjectId to string
                     logging.info(f"Post data inserted: {post_data}")
                 except errors.PyMongoError as e:
                     logging.error(f"Error inserting post data into MongoDB: {e}")
+                posts_data.append(post_data)
 
         return posts_data
 
@@ -104,4 +114,5 @@ if __name__ == "__main__":
     posts = reddit_extractor.fetch_reddit_data(subreddit_name)
 
     for post in posts[:2]:  
+        post['body'] = reddit_extractor.decompress_text(post['body'])  # Decompress body before printing
         print(post)
