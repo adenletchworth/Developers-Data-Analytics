@@ -7,3 +7,4 @@ transformers==4.40.1
 python-dotenv==1.0.1
 praw==7.7.1
 keybert==0.8.4
+confluent_kafka==2.4.0

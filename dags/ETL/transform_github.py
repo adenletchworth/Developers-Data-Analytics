@@ -5,6 +5,8 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from .ner_module import NamedEntityRecognizer  
 from keybert import KeyBERT
+import gzip
+import base64
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -19,6 +21,10 @@ class DataTransformer:
         self.kw_model = KeyBERT()
         self.stop_words = set(stopwords.words('english'))
         self.lemmatizer = WordNetLemmatizer()
+
+    def compress_text(self, text):
+        compressed_data = gzip.compress(text.encode('utf-8'))
+        return base64.b64encode(compressed_data).decode('utf-8')
 
     def preprocess_text(self, text):
         if text is None:
@@ -36,13 +42,13 @@ class DataTransformer:
         if description is None:
             return []
         topics = self.entity_model.predict(description)
-        return topics
+        return list(set(topics))
 
     def extract_keywords(self, text):
         if not text:
             return []
         keywords = self.kw_model.extract_keywords(text, keyphrase_ngram_range=(1, 2), stop_words='english')
-        return [kw[0] for kw in keywords]
+        return list(set(kw[0] for kw in keywords))
 
     def transform(self, data):
         if data is None:
@@ -55,6 +61,12 @@ class DataTransformer:
             preprocessed_description = self.preprocess_text(description)
             custom_topics = self.get_topics(description)
             keywords = self.extract_keywords(preprocessed_description)
+
+            readme_preprocessed = self.preprocess_text(repo_info['readme'])
+            readme_topics = self.get_topics(readme_preprocessed)
+            readme_keywords = self.extract_keywords(readme_preprocessed)
+
+            print(readme_keywords)
             
             transformed_data.append({
                 'id': repo_info['id'],
@@ -78,7 +90,10 @@ class DataTransformer:
                 'has_downloads': repo_info['has_downloads'],
                 'open_issues_count': repo_info['open_issues_count'],
                 'forks': repo_info['forks'],
-                'size': repo_info['size']
+                'size': repo_info['size'],
+                'readme_topics': readme_topics,
+                'readme_keywords': readme_keywords,
+                'readme_preprocessed': self.compress_text(readme_preprocessed)
             })
 
         return transformed_data
