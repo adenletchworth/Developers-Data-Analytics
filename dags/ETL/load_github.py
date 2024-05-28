@@ -9,8 +9,8 @@ def load_data_into_mongodb(data):
     connection_string = "mongodb://host.docker.internal:27017/"
     client = MongoClient(connection_string)
     
-    db = client["github_db"]
-    collection = db["developer_stats"]
+    db = client["Developer"]
+    collection = db["github_repos_raw"]
 
     if isinstance(data, str):
         data = json.loads(data)

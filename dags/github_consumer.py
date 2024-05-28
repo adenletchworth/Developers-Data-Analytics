@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.bash import BashOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator  # Correct import for Airflow 2.x
 from kafka_consumer import consume_kafka_messages
 from ETL.load_github import load_data_into_mongodb
 
@@ -19,7 +19,8 @@ dag = DAG(
 )
 
 def load_task(**kwargs):
-    consume_kafka_messages('github_topic', load_data_into_mongodb)
+    # Consume messages for a limited time or number of messages
+    consume_kafka_messages('github_topic', load_data_into_mongodb, timeout=600)  # 10 minutes timeout
 
 load_operator = PythonOperator(
     task_id='load',
@@ -28,10 +29,11 @@ load_operator = PythonOperator(
     dag=dag,
 )
 
-spark_task = BashOperator(
-    task_id='spark_processing',
-    bash_command='spark-submit --packages org.mongodb.spark:mongo-spark-connector_2.12:3.0.1 /opt/airflow/dags/spark_processing.py',
+# Trigger the second DAG
+trigger_second_dag = TriggerDagRunOperator(
+    task_id='trigger_spark_processing_dag',
+    trigger_dag_id='github_spark_dag',  # ID of the second DAG
     dag=dag,
 )
 
-load_operator >> spark_task
+load_operator >> trigger_second_dag

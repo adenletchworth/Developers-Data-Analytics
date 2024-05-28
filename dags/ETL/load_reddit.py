@@ -5,8 +5,8 @@ import logging
 def load_data_into_mongodb(data):
     try:
         client = MongoClient(os.getenv('MONGODB_URI'))
-        db = client['reddit_db']
-        collection = db['repos']
+        db = client['Developer']
+        collection = db['reddit_posts_raw']
         
         if data:
             for record in data:
