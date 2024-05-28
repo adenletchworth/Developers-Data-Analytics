@@ -102,6 +102,7 @@ services:
     depends_on:
       - zookeeper
     restart: always
+    
   postgres:
     image: postgres:13
     environment:
