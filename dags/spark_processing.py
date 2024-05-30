@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import base64
+from pymongo import MongoClient
 
 # Add the zipped ETL module to the Python path
 sys.path.insert(0, 'ETL.zip')
@@ -73,7 +74,6 @@ compress_readme_udf = udf(compress_readme, StringType())
 
 if 'description' in df.columns:
     logger.info("Processing 'description' column...")
-    df = df.withColumn("lowercase_description", lower(col("description").cast("string")))
     df = df.withColumn("keywords_from_description", extract_keywords_udf(col("description")))
     df = df.withColumn("entities_from_description", extract_entities_udf(col("description")))
 
@@ -85,7 +85,7 @@ if 'readme' in df.columns:
     df = df.withColumn("keywords_from_readme", extract_keywords_udf(col("readme")))
     df = df.withColumn("entities_from_readme", extract_entities_udf(col("readme")))
     df = df.withColumn("compressed_readme", compress_readme_udf(col("readme")))
-    df = df.drop("readme") 
+    df = df.drop("readme")
 
     df = df.withColumn("keywords_from_readme", when(size(col("keywords_from_readme")) > 0, col("keywords_from_readme")))
     df = df.withColumn("entities_from_readme", when(size(col("entities_from_readme")) > 0, col("entities_from_readme")))
@@ -99,6 +99,18 @@ if 'id' in df.columns:
 logger.info("Writing processed data back to MongoDB...")
 df.write.format("mongo").mode("overwrite").save()
 logger.info("Data written to MongoDB successfully.")
+
+# Initialize MongoDB client to delete raw entries
+logger.info("Deleting raw entries from MongoDB...")
+client = MongoClient("mongodb://host.docker.internal:27017/")
+raw_db = client.Developer.github_repos_raw
+
+# Get list of processed IDs
+processed_ids = df.select("id").rdd.flatMap(lambda x: x).collect()
+
+# Delete entries in raw collection based on processed IDs
+delete_result = raw_db.delete_many({"id": {"$in": processed_ids}})
+logger.info(f"Deleted {delete_result.deleted_count} entries from the raw collection.")
 
 # Stop Spark session
 spark.stop()
