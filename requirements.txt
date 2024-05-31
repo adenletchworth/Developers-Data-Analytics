@@ -9,3 +9,5 @@ praw==7.7.1
 keybert==0.8.4
 confluent_kafka==2.4.0
 pyspark==3.5.1
+beautifulsoup4==4.9.0
+markdown==3.6
