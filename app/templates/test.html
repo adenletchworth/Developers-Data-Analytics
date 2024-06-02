@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f4f4f4;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+        }
+        .metrics, .repository-info, .visualizations, .details {
+            padding: 10px;
+            background: #fff;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .metrics {
+            display: flex;
+            justify-content: space-around;
+        }
+        .visualizations {
+            display: flex;
+            justify-content: space-between;
+        }
+        .visualization {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .repository-info, .details {
+            overflow-y: auto;
+        }
+        .repository-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .repository-table th, .repository-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Project Dashboard</h1>
+        </div>
+        <div class="filters">
+            <input type="text" placeholder="Search...">
+            <input type="date">
+        </div>
+        <div class="content">
+            <div class="metrics">
+                <div class="metric">Total Repositories: <span id="total-repos">0</span></div>
+                <div class="metric">Average Forks: <span id="avg-forks">0</span></div>
+                <div class="metric">Average Stars: <span id="avg-stars">0</span></div>
+                <div class="metric">Average Watchers: <span id="avg-watchers">0</span></div>
+                <div class="metric">Average Issues: <span id="avg-issues">0</span></div>
+            </div>
+            <div class="repository-info">
+                <h2>Repository Information</h2>
+                <table class="repository-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Created At</th>
+                            <th>Updated At</th>
+                            <th>Description</th>
+                            <th>Forks</th>
+                            <th>Stars</th>
+                            <th>Watchers</th>
+                            <th>Issues</th>
+                            <th>License</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repository-data">
+                    </tbody>
+                </table>
+            </div>
+            <div class="visualizations">
+                <div class="visualization" id="word-cloud">
+                    <h2>Word Cloud</h2>
+                </div>
+                <div class="visualization" id="force-graph">
+                    <h2>Force-Directed Graph</h2>
+                </div>
+            </div>
+            <div class="details">
+                <h2>Detailed Repository View</h2>
+                <div id="repository-details">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

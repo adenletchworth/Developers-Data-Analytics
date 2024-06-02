@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developer Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="http://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <header>
         <h1>Developer Dashboard</h1>
     </header>
-    <div id="chart"></div>
+    <div id="word-cloud"></div>
+    <script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}"></script>
     <script src="{{ url_for('static', filename='js/d3_2.js') }}"></script>
     <footer>
         <p>Developer Dashboard &copy; 2024</p>
     </footer>
 </body>
 </html>
-
-
