@@ -88,6 +88,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
     restart: always
 
   kafka:
@@ -99,6 +101,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     depends_on:
       - zookeeper
     restart: always
@@ -244,3 +248,5 @@ services:
 
 volumes:
   postgres-db-volume:
+  zookeeper-data:
+  kafka-data:

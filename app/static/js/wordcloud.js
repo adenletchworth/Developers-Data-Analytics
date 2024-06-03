@@ -11,7 +11,7 @@ function fetchData(endpoint) {
             // Map the API data to the format required by the word cloud
             const processedData = data.map(item => ({
                 text: item._id,
-                size: item.count * 10 // Multiply by 10 to scale the sizes appropriately
+                size: item.count * 10 
             }));
             createWordCloud(processedData);
         })
@@ -55,5 +55,4 @@ function createWordCloud(data) {
     }
 }
 
-// Fetch initial data when the page loads
-fetchData('http://localhost:5000/api/top_keywords_from_readmes');
+fetchData('/api/top_keywords_from_readmes');

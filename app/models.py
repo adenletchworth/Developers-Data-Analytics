@@ -19,6 +19,8 @@ class MongoModels:
             .appName("MongoSparkConnector") \
             .config("spark.mongodb.input.uri", uri) \
             .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.3.0") \
+            .config("spark.executor.memory", "4g") \
+            .config("spark.driver.memory", "4g") \
             .getOrCreate()
         
         self.df = self.spark.read.format("mongodb") \
@@ -27,8 +29,8 @@ class MongoModels:
             .option("collection", collection) \
             .load()
         
-        # Decompress the readmes
-        self.df = self.df.withColumn("readme", decode_base64_udf(col("compressed_readme")))
+        # Decompress the readmes and cache the DataFrame
+        self.df = self.df.withColumn("readme", decode_base64_udf(col("compressed_readme"))).cache()
 
     def get_sample(self):
         return self.df.select("readme").limit(1)
@@ -36,14 +38,14 @@ class MongoModels:
     def lda_predict(self, data):
         try:
             tokenizer = Tokenizer(inputCol="readme", outputCol="words")
-            words_data = tokenizer.transform(data)
+            words_data = tokenizer.transform(data).cache()
             
             vectorizer = CountVectorizer(inputCol="words", outputCol="features")
             cv_model = vectorizer.fit(words_data)
-            vectorized_data = cv_model.transform(words_data)
+            vectorized_data = cv_model.transform(words_data).cache()
 
             if not hasattr(self, 'lda_model') or not self.lda_model:
-                lda = LDA(k=3, maxIter=10, seed=1, optimizer="em")
+                lda = LDA(k=3, maxIter=10, seed=1, optimizer="online")
                 self.lda_model = lda.fit(vectorized_data)
 
             transformed = self.lda_model.transform(vectorized_data)
@@ -58,19 +60,3 @@ class MongoModels:
         except Exception as e:
             print(f"Error during LDA prediction: {e}")
             return None, None
-
-
-# database_name = "Developer"
-# collection_name = "github_repos"
-# models = MongoModels("mongodb://localhost:27017", database_name, collection_name)
-
-# sample = models.get_sample()
-# result, topics_words = models.lda_predict(sample)
-
-# if result:
-#     result.show(truncate=False)
-
-# if topics_words:
-#     for idx, topic in enumerate(topics_words):
-#         print(f"Topic {idx}: {', '.join(topic)}")
-

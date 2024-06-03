@@ -51,6 +51,10 @@ df = spark.read.format("mongo").load()
 logger.info("DataFrame Schema:")
 df.printSchema()
 
+# Verify the presence of the "id" column
+logger.info("DataFrame Columns:")
+logger.info(df.columns)
+
 # Initialize KeyBERT and NER models
 kw_model = KeyBERT()
 entity_model = NamedEntityRecognizer('adenletchworth/CS-NER')
@@ -145,7 +149,9 @@ client = MongoClient("mongodb://host.docker.internal:27017/")
 raw_db = client.Developer.github_repos_raw
 
 # Get list of processed IDs
+logger.info("Getting list of processed IDs...")
 processed_ids = df.select("id").rdd.flatMap(lambda x: x).collect()
+logger.info(f"Processed IDs: {processed_ids}")
 
 # Delete entries in raw collection based on processed IDs
 delete_result = raw_db.delete_many({"id": {"$in": processed_ids}})

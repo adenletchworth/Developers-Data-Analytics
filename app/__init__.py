@@ -1,9 +1,11 @@
 import logging
 from flask import Flask, g
 from flask_cors import CORS
+from flask_caching import Cache
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+from app.extensions import cache
 
 load_dotenv()  
 
@@ -20,6 +22,11 @@ def create_app():
     # Initialize MongoDB client
     client = MongoClient(app.config['MONGO_URI'])
     app.db = client.get_database('Developer')  
+
+    app.config['CACHE_TYPE'] = 'simple'
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+
+    cache.init_app(app)
 
     # Register Blueprints
     from app.routes import main
