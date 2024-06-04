@@ -140,7 +140,7 @@ if 'id' in df.columns:
 
 # Write the processed data back to MongoDB
 logger.info("Writing processed data back to MongoDB...")
-df.write.format("mongo").mode("overwrite").save()
+df.write.format("mongo").mode("append").save()
 logger.info("Data written to MongoDB successfully.")
 
 # Initialize MongoDB client to delete raw entries

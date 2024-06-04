@@ -20,12 +20,17 @@ function fetchData(endpoint) {
 
 function createWordCloud(data) {
     // Clear the existing word cloud
-    d3.select("#word-cloud").selectAll("*").remove();
+    d3.select("#word-cloud-container").selectAll("*").remove();
+
+    // Get the dimensions of the container
+    const container = d3.select("#word-cloud-container");
+    const width = container.node().getBoundingClientRect().width;
+    const height = container.node().getBoundingClientRect().height;
 
     var layout = d3.layout.cloud()
-        .size([500, 500])
+        .size([width, height])
         .words(data)
-        .padding(5)
+        .padding(1) // Decrease the padding value to bring words closer
         .rotate(function() { return ~~(Math.random() * 2) * 90; })
         .font("Impact")
         .fontSize(function(d) { return d.size; })
@@ -36,7 +41,7 @@ function createWordCloud(data) {
     function draw(words) {
         var color = d3.scaleOrdinal(d3.schemeCategory10); // Use D3's categorical color scale
 
-        d3.select("#word-cloud").append("svg")
+        d3.select("#word-cloud-container").append("svg")
             .attr("width", layout.size()[0])
             .attr("height", layout.size()[1])
             .append("g")

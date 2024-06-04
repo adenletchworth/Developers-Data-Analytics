@@ -3,19 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Developer Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Project Dashboard</title>
+    <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
-    <header>
-        <h1>Developer Dashboard</h1>
-    </header>
-    <div id="word-cloud"></div>
-    <script src="{{ url_for('static', filename='js/d3.layout.cloud.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/d3_2.js') }}"></script>
-    <footer>
-        <p>Developer Dashboard &copy; 2024</p>
-    </footer>
+    <div class="container">
+        <div class="metrics">
+            <div class="metric">Total Repositories: <span id="total-repos">0</span></div>
+            <div class="metric">Average Forks: <span id="avg-forks">0</span></div>
+            <div class="metric">Average Stars: <span id="avg-stars">0</span></div>
+            <div class="metric">Average Watchers: <span id="avg-watchers">0</span></div>
+            <div class="metric">Average Issues: <span id="avg-issues">0</span></div>
+        </div>
+        <div class="grid-container">
+            <div class="grid-item" id="word-cloud">
+                <h2>Word Cloud</h2>
+                <div id="word-cloud-container"></div>
+            </div>
+            <div class="grid-item" id="circular-chart">
+                <h2>Repository Licenses Distribution</h2>
+                <div id="circular-chart-container"></div>
+            </div>
+            <div class="grid-item grid-item-span-2" id="force-graph">
+                <h2>Topics From Repositories</h2>
+                <div id="graph" class="graph-container"></div>
+            </div>
+            <div class="grid-item" id="line-chart">
+                <h2>Stars Over Time</h2>
+                <div id="line-chart-container"></div>
+            </div>
+            <div class="grid-item" id="chord-diagram">
+                <h2>Language Usage Relationships</h2>
+                <div id="chord-diagram-container"</div>
+            </div>            
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="static/js/d3.layout.cloud.js"></script>
+    <script src="static/js/wordcloud.js"></script>
+    <script src="static/js/force.js"></script>
+    <script src="static/js/statistics.js"></script>
+    <script src="static/js/circular-chart.js"></script>
+    <script src="static/js/line-chart.js"></script>
+    <script src="static/js/chord-diagram.js"></script>
 </body>
 </html>

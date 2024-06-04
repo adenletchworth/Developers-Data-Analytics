@@ -2,14 +2,17 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch('/api/repositories_by_license')
         .then(response => response.json())
         .then(data => {
-            const transformedData = data.map(d => ({ license: d._id, count: d.count }));
-            createDonutChart(transformedData);
+            const transformedData = data
+                .filter(d => d._id !== 'None') 
+                .map(d => ({ license: d._id, count: d.count }));
+            const total = transformedData.reduce((acc, d) => acc + d.count, 0);
+            createDonutChart(transformedData, total);
         })
         .catch(error => console.error('Error fetching repository data:', error));
 });
 
-function createDonutChart(data) {
-    const width = 400;
+function createDonutChart(data, total) {
+    const width = 1000; 
     const height = 400;
     const radius = Math.min(width, height) / 2;
 
@@ -18,7 +21,7 @@ function createDonutChart(data) {
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", `translate(${width / 2}, ${height / 2})`);
+        .attr("transform", `translate(${width / 2 - 150}, ${height / 2})`);
     
     const color = d3.scaleOrdinal(d3.schemeCategory10);
     
@@ -27,7 +30,6 @@ function createDonutChart(data) {
         .outerRadius(radius - 10)
         .innerRadius(radius - 70);
 
-    // Tooltip
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
         .style("position", "absolute")
@@ -57,22 +59,37 @@ function createDonutChart(data) {
         .attr("d", path)
         .attr("fill", d => color(d.data.license));
     
-    // Adding legend
+    svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-0.5em")
+        .attr("class", "total-count")
+        .style("font-size", "24px") 
+        .text(total);
+
+    svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "1em")
+        .attr("class", "total-text")
+        .style("font-size", "14px") 
+        .text("Total Repositories");
+
     const legend = svg.append("g")
-        .attr("transform", `translate(${radius + 20}, ${-radius})`);
+        .attr("transform", `translate(${radius + 120}, ${-radius / 2})`); 
     
     data.forEach((d, i) => {
         const legendRow = legend.append("g")
-            .attr("transform", `translate(0, ${i * 20})`);
+            .attr("transform", `translate(0, ${i * 25})`); 
         
         legendRow.append("rect")
-            .attr("width", 10)
-            .attr("height", 10)
+            .attr("width", 14) 
+            .attr("height", 14)
             .attr("fill", color(d.license));
         
         legendRow.append("text")
             .attr("x", 20)
             .attr("y", 10)
-            .text(d.license);
+            .text(d.license)
+            .style("font-size", "16px")
+            .attr("text-anchor", "start"); 
     });
 }

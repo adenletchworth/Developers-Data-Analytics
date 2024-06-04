@@ -1,6 +1,5 @@
 console.log('force.js loaded');
 
-// Fetch data from the endpoint
 function fetchData(endpoint) {
     fetch(endpoint)
         .then(response => {
@@ -38,15 +37,15 @@ function processData(data) {
     return { nodes, links };
 }
 
-// Create the force-directed graph
 function createForceGraph(data) {
     const { nodes, links } = data;
-    const width = document.getElementById('force-graph').clientWidth;
-    const height = document.getElementById('force-graph').clientHeight;
+    const container = document.getElementById('graph');
+    const width = container.clientWidth;
+    const height = Math.max(container.clientHeight, 900);
 
     const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    const svg = d3.select("#force-graph").append("svg")
+    const svg = d3.select(container).append("svg")
         .attr("width", width)
         .attr("height", height);
 
@@ -61,7 +60,8 @@ function createForceGraph(data) {
         .data(links)
         .enter().append("line")
         .attr("stroke-width", 2)
-        .attr("stroke", "#999");
+        .attr("stroke", "#999")
+        .style('height', '100%');
 
     const node = svg.append("g")
         .attr("class", "nodes")
@@ -104,7 +104,6 @@ function createForceGraph(data) {
     });
 }
 
-// Dragging behavior
 function drag(simulation) {
     function dragstarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -133,7 +132,7 @@ function initializeGraph() {
     fetchData('/api/lda');
 
     window.addEventListener('resize', () => {
-        d3.select("#force-graph").selectAll("*").remove();
+        d3.select("#graph").selectAll("*").remove();
         fetchData('/api/lda');
     });
 }

@@ -7,7 +7,7 @@ from ETL.load_github import load_data_into_mongodb
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime.now() - timedelta(days=1),
+    'start_date': datetime.now(),
     'retries': 1,
 }
 
@@ -15,12 +15,11 @@ dag = DAG(
     'github_kafka_consumer',
     default_args=default_args,
     description='GitHub Kafka Consumer DAG',
-    schedule_interval='@daily',
+    schedule_interval='@hourly',  
 )
 
 def load_task(**kwargs):
-    # Consume messages for a limited time or number of messages
-    consume_kafka_messages('github_topic', load_data_into_mongodb, timeout=600)  # 10 minutes timeout
+    consume_kafka_messages('github_topic', load_data_into_mongodb, timeout=600)  
 
 load_operator = PythonOperator(
     task_id='load',
@@ -29,10 +28,9 @@ load_operator = PythonOperator(
     dag=dag,
 )
 
-# Trigger the second DAG
 trigger_second_dag = TriggerDagRunOperator(
     task_id='trigger_spark_processing_dag',
-    trigger_dag_id='github_spark_dag',  # ID of the second DAG
+    trigger_dag_id='github_spark_dag', 
     dag=dag,
 )
 

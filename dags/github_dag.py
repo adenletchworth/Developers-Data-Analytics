@@ -17,7 +17,7 @@ dag = DAG(
     'github_stream_to_kafka',
     default_args=default_args,
     description='GitHub Stream to Kafka DAG',
-    schedule_interval='@daily',
+    schedule_interval='*/15 * * * *',  
 )
 
 extract_operator = PythonOperator(

@@ -12,6 +12,8 @@ from app.aggregations import (
     top_keywords_from_readmes,
     avg_statistics,
     stars_over_time,
+    repositories_by_language,
+    language_pairs,
 )
 
 main = Blueprint('main', __name__)
@@ -49,6 +51,24 @@ def get_repositories_by_license():
         return jsonify(result)
     except Exception as e:
         app.logger.error(f"Error fetching repositories by license: {e}")
+        return jsonify({"error": "An error occurred"}), 500
+
+@main.route('/api/language_pairs', methods=['GET'])
+def get_language_pairs():
+    try:
+        result = language_pairs(app.db)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Error fetching language pairs: {e}")
+        return jsonify({"error": "An error occurred"}), 500
+    
+@main.route('/api/repositories_by_language', methods=['GET'])
+def get_repositories_by_language():
+    try:
+        result = repositories_by_language(app.db)
+        return jsonify(result)
+    except Exception as e:
+        app.logger.error(f"Error fetching repositories by language: {e}")
         return jsonify({"error": "An error occurred"}), 500
 
 @main.route('/api/activity_metrics', methods=['GET'])
