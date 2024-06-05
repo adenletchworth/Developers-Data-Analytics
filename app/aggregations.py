@@ -1,5 +1,5 @@
 def total_repositories(db):
-    collection = db.github_repos  # Access the 'github_repos' collection
+    collection = db.github_repos  
     pipeline = [
         { "$count": "total_repositories" }
     ]
@@ -55,7 +55,8 @@ def language_pairs(db):
                 "count": { "$sum": 1 }
             }
         },
-        { "$sort": { "count": -1 } }
+        { "$sort": { "count": -1 }},
+        { "$limit": 500 }
     ]
     return list(collection.aggregate(pipeline))
 
@@ -88,11 +89,13 @@ def top_keywords_from_readmes(db):
     collection = db.github_repos
     pipeline = [
         { "$unwind": "$keywords_from_readme" },
+        { "$match": { "keywords_from_readme": { "$regex": "^[A-Za-z]+$", "$options": "i" } } },
         { "$group": { "_id": "$keywords_from_readme", "count": { "$sum": 1 } } },
         { "$sort": { "count": -1 } },
-        { "$limit": 250 }
+        { "$limit": 150 }
     ]
     return list(collection.aggregate(pipeline))
+
 
 def avg_statistics(db):
     collection = db.github_repos
@@ -104,7 +107,7 @@ def avg_statistics(db):
                 "avg_forks": { "$avg": "$forks_count" },
                 "avg_stargazers": { "$avg": "$stargazers_count" },
                 "avg_watchers": { "$avg": "$watchers_count" },
-                "avg_issues": { "$avg": "$open_issues_count" }  # Assuming the field name for issues is open_issues_count
+                "avg_issues": { "$avg": "$open_issues_count" } 
             }
         }
     ]

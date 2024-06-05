@@ -1,7 +1,5 @@
 from flask import Blueprint, render_template, g, jsonify, current_app as app
 from app.models import MongoModels
-from pyspark.ml.linalg import DenseVector
-import logging
 from app.extensions import cache
 
 from app.aggregations import (
@@ -103,25 +101,14 @@ def get_top_keywords_from_readmes():
 def get_lda():
     try:
         models = get_models()
-        result = models.get_sample()
-        if result:
-            transformed, topics_words = models.lda_predict(result)
+        topics_words = models.fit_lda()
 
-            if transformed:
-                transformed_data = transformed.select("topicDistribution").collect()
-                transformed_data_json = [
-                    {key: (value.tolist() if isinstance(value, DenseVector) else value) for key, value in row.asDict().items()}
-                    for row in transformed_data
-                ]
-            else:
-                transformed_data_json = []
-
+        if topics_words:
             return jsonify({
-                'transformed': transformed_data_json,
                 'topics_words': topics_words
             })
         else:
-            return jsonify({"error": "Failed to get sample data"}), 500
+            return jsonify({"error": "Failed to fit LDA model"}), 500
     except Exception as e:
         app.logger.error(f"Error performing LDA: {e}")
         return jsonify({"error": "An error occurred"}), 500

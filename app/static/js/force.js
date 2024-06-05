@@ -9,13 +9,13 @@ function fetchData(endpoint) {
             return response.json();
         })
         .then(data => {
+            console.log('Fetched data:', data); // Debugging line
             const processedData = processData(data);
             createForceGraph(processedData);
         })
         .catch(error => console.error('Error fetching data:', error));
 }
 
-// Process the fetched data
 function processData(data) {
     const nodes = [];
     const links = [];
@@ -37,8 +37,33 @@ function processData(data) {
     return { nodes, links };
 }
 
+function drag(simulation) {
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+    return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+}
+
 function createForceGraph(data) {
     const { nodes, links } = data;
+
     const container = document.getElementById('graph');
     const width = container.clientWidth;
     const height = Math.max(container.clientHeight, 900);
@@ -47,7 +72,11 @@ function createForceGraph(data) {
 
     const svg = d3.select(container).append("svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+        .call(d3.zoom().on("zoom", function (event) {
+            svg.attr("transform", event.transform)
+        }))
+        .append("g");
 
     const simulation = d3.forceSimulation(nodes)
         .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.source.group.startsWith('topic') ? 200 : 50))
@@ -102,30 +131,6 @@ function createForceGraph(data) {
         node
             .attr("transform", d => `translate(${d.x},${d.y})`);
     });
-}
-
-function drag(simulation) {
-    function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-
-    function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-    }
-
-    function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }
-
-    return d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended);
 }
 
 function initializeGraph() {
