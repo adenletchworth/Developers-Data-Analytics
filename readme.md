@@ -13,8 +13,6 @@ This project aims to build a real-time analytics dashboard that visualizes devel
 - [Usage](#usage)
 - [Data Pipeline](#data-pipeline)
 - [Visualizations](#visualizations)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
